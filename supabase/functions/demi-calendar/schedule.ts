@@ -4,6 +4,8 @@ export const SHIFT = 8 * 60 * MINUTE;
 export const BOOKING_DAYS = 45;
 export const NOTICE_DAYS = 7;
 export const LEAD = 15 * MINUTE;
+export const DURATION_STEP = 15;
+export const MAX_DURATION = 120;
 
 export type Interval = { start: number; end: number };
 export type WeeklyHours = ({ start: string; end: string } | null)[];
@@ -44,21 +46,57 @@ export function validateHours(weekly: unknown, duration: unknown): asserts weekl
   }
 }
 
-export function candidateSlots(now: number, days: number, weekly: WeeklyHours, duration: number) {
-  const slots: Interval[] = [];
+function* weeklyWindows(now: number, days: number, weekly: WeeklyHours) {
   const base = midnight(now);
-  const length = duration * MINUTE;
   for (let offset = 0; offset < days; offset++) {
     const day = base + offset * DAY;
     const index = (new Date(day + SHIFT).getUTCDay() + 6) % 7;
     const range = weekly[index];
-    if (!range) continue;
-    const end = day + timeMinutes(range.end) * MINUTE;
-    for (let slot = day + timeMinutes(range.start) * MINUTE; slot + length <= end; slot += length) {
+    if (range) {
+      yield { start: day + timeMinutes(range.start) * MINUTE, end: day + timeMinutes(range.end) * MINUTE };
+    }
+  }
+}
+
+export function isBookingDuration(minutes: number) {
+  return minutes >= DURATION_STEP && minutes <= MAX_DURATION && minutes % DURATION_STEP === 0;
+}
+
+export function candidateSlots(now: number, days: number, weekly: WeeklyHours, duration: number, increment = duration) {
+  const slots: Interval[] = [];
+  const length = duration * MINUTE;
+  for (const window of weeklyWindows(now, days, weekly)) {
+    for (let slot = window.start; slot + length <= window.end; slot += increment * MINUTE) {
       if (slot >= now + LEAD) slots.push({ start: slot, end: slot + length });
     }
   }
   return slots;
+}
+
+export function durationWindows(now: number, days: number, weekly: WeeklyHours) {
+  const candidates: Interval[] = [];
+  const increment = DURATION_STEP * MINUTE;
+  for (const window of weeklyWindows(now, days, weekly)) {
+    for (let start = window.start; start + increment <= window.end; start += increment) {
+      if (start >= now + LEAD) {
+        candidates.push({ start, end: Math.min(window.end, start + MAX_DURATION * MINUTE) });
+      }
+    }
+  }
+  return candidates;
+}
+
+export function durationOptions(windows: Interval[], busy: Interval[]) {
+  const sorted = [...busy].sort((a, b) => a.start - b.start);
+  const options: { start: number; maxMinutes: number }[] = [];
+  let cursor = 0;
+  for (const window of windows) {
+    while (cursor < sorted.length && sorted[cursor].end <= window.start) cursor++;
+    const end = Math.min(window.end, sorted[cursor]?.start ?? window.end);
+    const maxMinutes = Math.floor((end - window.start) / (DURATION_STEP * MINUTE)) * DURATION_STEP;
+    if (maxMinutes >= DURATION_STEP) options.push({ start: window.start, maxMinutes });
+  }
+  return options;
 }
 
 export function splitSlots(slots: Interval[], busy: Interval[]) {

@@ -36,7 +36,6 @@
     <section class="invitation" aria-labelledby="invite-title">
       <div class="invitation-copy">
         <h1 id="invite-title">Book a hangout.</h1>
-        <p>Singapore time (GMT+8)</p>
       </div>
       <div class="sculpture-stage" data-reveal>
         <img class="sculpture" src="./assets/companions.webp" width="1000" height="663" alt="" fetchpriority="high">
@@ -61,7 +60,14 @@
         </div>
         <div class="time-panel">
           <h2 id="chosen-date" aria-live="polite">Choose a time</h2>
-          <p class="time-meta" id="duration-label"></p>
+          <div class="guest-duration" id="duration-control" hidden>
+            <div class="duration-heading">
+              <label for="guest-duration">Hangout length</label>
+              <output id="duration-value" for="guest-duration" aria-hidden="true">60 min</output>
+            </div>
+            <input id="guest-duration" type="range" min="15" max="120" step="15" value="60" aria-valuetext="60 minutes">
+            <div class="duration-endpoints" aria-hidden="true"><span>15 min</span><span>2 hr</span></div>
+          </div>
           <div class="times" id="times" role="group" aria-label="Choose a time"></div>
           <button class="button primary continue" id="continue" disabled type="button">
             Continue <span class="button-arrow"><svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></span>
@@ -137,7 +143,7 @@
             <h2 id="hours-title">Weekly hours</h2>
             <p class="muted">Singapore time · Guests can book 45 days ahead.</p>
             <form class="form-stack" id="hours-form">
-              <label class="duration-field">Hangout length <select id="duration" name="duration"><option value="30">30 minutes</option><option value="45">45 minutes</option><option value="60">60 minutes</option><option value="90">90 minutes</option></select></label>
+              <label class="duration-field">Default hangout length <select id="duration" name="duration"><option value="30">30 minutes</option><option value="45">45 minutes</option><option value="60">60 minutes</option><option value="90">90 minutes</option></select></label>
               <div id="weekly-hours" class="weekly-hours"></div>
               <p class="form-message" role="status"></p>
               <button class="button primary" type="submit">Save hours</button>

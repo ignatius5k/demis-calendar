@@ -2,7 +2,8 @@ import postgres from "postgres";
 import { buildPushPayload, type PushSubscription } from "web-push";
 import { appleClient, type AppleCalendar, type AppleEvent, type Credentials } from "./apple.ts";
 import {
-  BOOKING_DAYS, candidateSlots, DAY, isEmail, isId, iso, label, midnight, MINUTE, NOTICE_DAYS,
+  BOOKING_DAYS, candidateSlots, DAY, DURATION_STEP, durationOptions, durationWindows, isBookingDuration,
+  isEmail, isId, iso, label, midnight, MINUTE, NOTICE_DAYS,
   overlaps, RequestError, splitSlots, validateHours, type Interval, type WeeklyHours,
 } from "./schedule.ts";
 
@@ -135,15 +136,16 @@ async function busyTimes(connection: Connection, range: Interval, access: Creden
 
 async function availability(settings: Settings) {
   const now = Date.now();
-  const slots = candidateSlots(now, BOOKING_DAYS, settings.weekly, settings.length_minutes);
+  const windows = durationWindows(now, BOOKING_DAYS, settings.weekly);
   const connection = settings.connection;
-  if (!connection || !slots.length) {
-    return { connected: Boolean(connection), starts: [], duration: settings.length_minutes };
+  if (!connection || !windows.length) {
+    return { connected: Boolean(connection), starts: [], options: [], duration: settings.length_minutes };
   }
-  const range = { start: slots[0].start, end: slots[slots.length - 1].end };
+  const range = { start: windows[0].start, end: windows[windows.length - 1].end };
   const busy = await busyTimes(connection, range, await credentials());
+  const slots = candidateSlots(now, BOOKING_DAYS, settings.weekly, settings.length_minutes);
   const { open } = splitSlots(slots, busy);
-  return { connected: true, starts: open, duration: settings.length_minutes };
+  return { connected: true, starts: open, options: durationOptions(windows, busy), duration: settings.length_minutes };
 }
 
 async function hostView(settings?: Settings) {
@@ -284,7 +286,11 @@ async function reserve(input: Record<string, unknown>, settings: Settings, kind:
   }
   const now = Date.now();
   if (kind === "booking") {
-    const slots = candidateSlots(now, BOOKING_DAYS, settings.weekly, settings.length_minutes);
+    const duration = (end - start) / MINUTE;
+    if (!isBookingDuration(duration)) {
+      throw new RequestError(400, "Choose a length from 15 to 120 minutes in 15-minute steps.");
+    }
+    const slots = candidateSlots(now, BOOKING_DAYS, settings.weekly, duration, DURATION_STEP);
     if (!slots.some((slot) => slot.start === start && slot.end === end)) throw new RequestError(409, "That time is no longer available.");
     const busy = await busyTimes(connection, interval, await credentials());
     if (busy.some((event) => overlaps(event, interval))) throw new RequestError(409, "That time just became unavailable. Please choose another.");
@@ -299,7 +305,7 @@ async function reserve(input: Record<string, unknown>, settings: Settings, kind:
       const tx = transaction as unknown as typeof sql;
       const [config] = await tx<Settings[]>`select * from demi.settings where id for update`;
       if (JSON.stringify(config.connection) !== JSON.stringify(connection) ||
-        kind === "booking" && (config.length_minutes !== settings.length_minutes || JSON.stringify(config.weekly) !== JSON.stringify(settings.weekly))) {
+        kind === "booking" && JSON.stringify(config.weekly) !== JSON.stringify(settings.weekly)) {
         throw new RequestError(409, "Availability changed. Please select a time again.");
       }
       const [saved] = await tx<EventRow[]>`insert into demi.events (id, kind, starts_at, ends_at, calendar_url, name, email, note)

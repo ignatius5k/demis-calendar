@@ -7,10 +7,13 @@ const BOOKING_DAYS = 45;
 const ZONE = "Asia/Singapore";
 const SHIFT = 8 * 60 * MINUTE;
 const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+const durationInput = $("guest-duration");
+const DURATION_STEP = Number(durationInput.step);
+const MAX_DURATION = Number(durationInput.max);
 const dateFormat = new Intl.DateTimeFormat("en-SG", { timeZone: ZONE, weekday: "long", month: "long", day: "numeric" });
 const monthFormat = new Intl.DateTimeFormat("en", { timeZone: "UTC", month: "long", year: "numeric" });
 const timeFormat = new Intl.DateTimeFormat("en-SG", { timeZone: ZONE, hour: "numeric", minute: "2-digit", hour12: true });
-const takenPreview = new Set();
+const takenPreview = [];
 const state = {
   mode: "loading",
   slotsByDay: new Map(),
@@ -18,6 +21,8 @@ const state = {
   selectedStart: null,
   month: null,
   duration: 60,
+  chosenDuration: null,
+  options: [],
   lastFetch: 0,
   hostKey: sessionStorage.getItem("demi-host-key") || "",
   host: null,
@@ -87,33 +92,47 @@ async function api(action, { key, data } = {}) {
   return result;
 }
 
-function sampleSlots(now) {
-  const windows = [null, [17, 18, 19], null, [17, 18, 19], [16, 17, 18], [11, 12, 13, 14], [12, 13, 14]];
+function sampleOptions(now) {
+  const windows = [null, [17, 20], null, [17, 20], [16, 19], [11, 15], [12, 15]];
   const today = dayEpoch(dateKey(now));
-  const starts = [];
+  const options = [];
+  const step = DURATION_STEP * MINUTE;
   for (let offset = 0; offset < BOOKING_DAYS; offset++) {
     const day = today + offset * DAY;
     const index = (new Date(day + SHIFT).getUTCDay() + 6) % 7;
-    for (const hour of windows[index] || []) {
-      const start = day + hour * 60 * MINUTE;
-      if (start > now + 15 * MINUTE && !takenPreview.has(start)) starts.push(start);
+    const window = windows[index];
+    if (!window) continue;
+    const end = day + window[1] * 60 * MINUTE;
+    for (let start = day + window[0] * 60 * MINUTE; start + step <= end; start += step) {
+      if (start < now + 15 * MINUTE) continue;
+      let until = Math.min(end, start + MAX_DURATION * MINUTE);
+      for (const booking of takenPreview) {
+        if (booking.end > start) until = Math.min(until, booking.start);
+      }
+      const maxMinutes = Math.floor((until - start) / step) * DURATION_STEP;
+      if (maxMinutes >= DURATION_STEP) options.push({ start, maxMinutes });
     }
   }
-  return starts;
+  return options;
 }
 
-function useAvailability(starts, duration, mode) {
+function useAvailability(options, duration, mode) {
   state.mode = mode;
-  state.duration = duration;
+  state.options = options;
+  state.duration = state.chosenDuration ?? duration;
+  filterSlots(false);
+}
+
+function filterSlots(keepDate) {
   state.slotsByDay = new Map();
-  for (const start of starts) {
+  for (const { start, maxMinutes } of state.options) {
+    if (maxMinutes < state.duration) continue;
     const key = dateKey(start);
     const slots = state.slotsByDay.get(key) || [];
     slots.push(start);
     state.slotsByDay.set(key, slots);
   }
-  if (!state.month) state.month = toMonth(dateKey(starts[0] ?? Date.now()));
-  if (!state.slotsByDay.has(state.selectedDate)) selectFirstDate();
+  if ((!keepDate || !state.selectedDate) && !state.slotsByDay.has(state.selectedDate)) selectFirstDate();
   if (!(state.slotsByDay.get(state.selectedDate) || []).includes(state.selectedStart)) state.selectedStart = null;
   renderGuest();
 }
@@ -130,8 +149,8 @@ function refreshAvailability() {
     try {
       const payload = API_URL ? await api("availability") : { connected: false };
       state.lastFetch = Date.now();
-      if (payload.connected) useAvailability(payload.starts, payload.duration, "live");
-      else useAvailability(sampleSlots(Date.now()), 60, "preview");
+      if (payload.connected) useAvailability(payload.options, payload.duration, "live");
+      else useAvailability(sampleOptions(Date.now()), payload.duration ?? 60, "preview");
     } catch {
       useAvailability([], state.duration, "error");
     }
@@ -182,7 +201,13 @@ function renderGuest() {
   const focusedTime = document.activeElement?.dataset.start;
   const times = state.slotsByDay.get(state.selectedDate) || [];
   $("chosen-date").textContent = state.selectedDate ? formatDate(dayEpoch(state.selectedDate)) : "Choose a time";
-  $("duration-label").textContent = state.selectedDate ? state.duration + " min hangout" : "";
+  $("duration-control").hidden = state.mode === "loading" || state.mode === "error";
+  durationInput.value = state.duration;
+  durationInput.setAttribute("aria-valuetext", state.duration + " minutes");
+  const minimum = Number(durationInput.min);
+  const progress = (state.duration - minimum) / (MAX_DURATION - minimum) * 100;
+  durationInput.style.setProperty("--duration-progress", progress + "%");
+  $("duration-value").value = state.duration + " min";
   const timeButtons = times.map((start) => {
     const button = node("button", "time-choice", formatTime(start));
     button.type = "button";
@@ -194,7 +219,7 @@ function renderGuest() {
   const emptyMessage = {
     loading: "Checking the calendar…",
     error: "The calendar is temporarily unavailable.",
-  }[state.mode] || "No openings this month.";
+  }[state.mode] || (state.selectedDate ? "No times fit this length on this date." : "No openings this month for this length.");
   $("times").replaceChildren(...(timeButtons.length ? timeButtons : [node("p", "slot-message", emptyMessage)]));
   if (focusedTime) timeButtons.find((button) => button.dataset.start === focusedTime)?.focus({ preventScroll: true });
   $("continue").disabled = state.selectedStart === null;
@@ -210,6 +235,23 @@ function renderGuest() {
     status.append(retry);
   }
 }
+
+let timeRefresh;
+durationInput.addEventListener("input", () => {
+  timeRefresh?.cancel();
+  state.duration = durationInput.valueAsNumber;
+  state.chosenDuration = state.duration;
+  filterSlots(true);
+});
+
+durationInput.addEventListener("change", () => {
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  // Figma Motion's available-times track settles at 12% of its two-second preview.
+  timeRefresh = $("times").animate([
+    { opacity: 0.72, transform: "translateY(4px)" },
+    { opacity: 1, transform: "translateY(0px)" },
+  ], { duration: 240, easing: "cubic-bezier(0.22, 1, 0.36, 1)" });
+});
 
 for (const [id, by] of [["month-prev", -1], ["month-next", 1]]) {
   $(id).addEventListener("click", () => {
@@ -294,7 +336,7 @@ handleForm("book-form", async (values) => {
       throw error;
     }
   } else {
-    takenPreview.add(start);
+    takenPreview.push({ start, end });
   }
   $("book-step").hidden = true;
   $("confirmed-step").hidden = false;

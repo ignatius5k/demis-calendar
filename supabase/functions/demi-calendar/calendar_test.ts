@@ -1,6 +1,6 @@
 import { deepStrictEqual, equal, rejects } from "node:assert/strict";
 import { appleClient, readBusy, serializeEvent } from "./apple.ts";
-import { candidateSlots, MINUTE, splitSlots, validateHours } from "./schedule.ts";
+import { candidateSlots, DURATION_STEP, durationOptions, durationWindows, isBookingDuration, MINUTE, splitSlots, validateHours } from "./schedule.ts";
 
 const stamp = (date: string) => new Date(date).getTime();
 const line = (...parts: string[]) => parts.join("\r\n");
@@ -34,6 +34,32 @@ Deno.test("recurring, all-day, and free iCloud events determine busy times", () 
   deepStrictEqual(busy.map((span) => new Date(span.start).toISOString()), [
     "2026-11-23T09:00:00.000Z", "2026-11-23T16:00:00.000Z", "2026-11-25T11:00:00.000Z", "2026-11-26T09:00:00.000Z",
   ]);
+});
+
+Deno.test("duration choices stop at busy events and the end of the host's window", () => {
+  const minutesFrom = (time: string) => stamp("2026-11-26T" + time + ":00+08:00");
+  const now = minutesFrom("16:00");
+  const weekly = [null, null, null, { start: "17:10", end: "20:25" }, null, null, null];
+  const busy = [
+    { start: minutesFrom("18:18"), end: minutesFrom("18:40") },
+    { start: minutesFrom("18:30"), end: minutesFrom("19:10") },
+  ];
+  const options = durationOptions(durationWindows(now, 1, weekly), busy);
+  const byStart = new Map(options.map(({ start, maxMinutes }) => [start, maxMinutes]));
+  equal(byStart.get(minutesFrom("17:10")), 60);
+  equal(byStart.get(minutesFrom("17:25")), 45);
+  equal(byStart.get(minutesFrom("18:10")), undefined);
+  equal(byStart.get(minutesFrom("18:55")), undefined);
+  equal(byStart.get(minutesFrom("19:10")), 75);
+  equal(byStart.get(minutesFrom("20:10")), 15);
+
+  for (const duration of [15, 30, 45, 60, 75, 90, 105, 120]) {
+    equal(isBookingDuration(duration), true);
+    const slots = candidateSlots(now, 1, weekly, duration, DURATION_STEP);
+    deepStrictEqual(splitSlots(slots, busy).open, options.filter((option) => option.maxMinutes >= duration).map((option) => option.start));
+  }
+  for (const duration of [0, 19, 121, 135]) equal(isBookingDuration(duration), false);
+  equal(durationOptions(durationWindows(now, 1, weekly), [])[0].maxMinutes, 120);
 });
 
 Deno.test("CalDAV discovery follows iCloud redirects and private holds round-trip as busy", async () => {

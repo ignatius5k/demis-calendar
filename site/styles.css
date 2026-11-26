@@ -89,7 +89,6 @@ p { overflow-wrap: anywhere; }
 .invitation h1 {
   font-size: clamp(2.9rem, 6.1vw, 4.6rem); font-weight: 760; line-height: 1; letter-spacing: -.065em;
 }
-.invitation p { margin-block-start: 12px; color: var(--muted); font-size: .97rem; }
 .sculpture-stage { isolation: isolate; position: relative; display: grid; justify-items: center; }
 .sculpture-stage::before {
   content: ""; position: absolute; z-index: -1; inset: 6% -7% -7%;
@@ -151,11 +150,32 @@ p { overflow-wrap: anywhere; }
 }
 .legend::before { inline-size: 5px; block-size: 5px; }
 
-.time-meta { color: var(--muted); font-size: .88rem; margin-block-start: 6px; }
-.time-meta:empty { display: none; }
+.guest-duration { margin-block-start: 17px; }
+.duration-heading, .duration-endpoints {
+  display: flex; justify-content: space-between; align-items: center; gap: 10px;
+}
+.duration-heading output { color: #71435e; font-size: .9rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+.duration-endpoints { color: var(--muted); font-size: .74rem; }
+#guest-duration {
+  --duration-track: #e6dce5;
+  appearance: none; display: block; width: 100%; height: 30px; padding: 0; margin: 1px 0 -1px;
+  border: 0; border-radius: 5px; background: transparent; accent-color: var(--accent); cursor: ew-resize;
+}
+#guest-duration::-webkit-slider-runnable-track {
+  height: 4px; border-radius: 999px;
+  background: linear-gradient(to right, var(--accent) var(--duration-progress), var(--duration-track) var(--duration-progress));
+}
+#guest-duration::-webkit-slider-thumb {
+  appearance: none; width: 16px; height: 16px; margin-top: -6px;
+  border: 0; border-radius: 50%; background: var(--accent);
+}
+#guest-duration::-moz-range-track, #guest-duration::-moz-range-progress { height: 4px; border-radius: 999px; }
+#guest-duration::-moz-range-track { background: var(--duration-track); }
+#guest-duration::-moz-range-progress { background: var(--accent); }
+#guest-duration::-moz-range-thumb { width: 16px; height: 16px; border: 0; border-radius: 50%; background: var(--accent); }
 .times {
   display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px;
-  max-height: 220px; overflow-y: auto; scrollbar-width: thin;
+  max-height: 208px; overflow-y: auto; scrollbar-width: thin;
   padding: 4px; margin: 14px -4px -4px;
 }
 .time-choice {
@@ -198,7 +218,7 @@ p { overflow-wrap: anywhere; }
 .form-stack > .button { justify-self: start; }
 .form-stack > .full { width: 100%; }
 label, legend { display: block; font-size: .9rem; font-weight: 760; }
-input:not([type="checkbox"]), select, textarea {
+input:not([type="checkbox"], [type="range"]), select, textarea {
   display: block; width: 100%; min-width: 0; min-height: 44px; border: 0; border-radius: 12px;
   padding: 9px 11px; margin-block-start: 5px; font-size: 1rem; font-weight: 650;
   background: #f8f4f6; box-shadow: inset 0 0 0 1px #52344525, inset 0 2px 3px #3a1d3006;
@@ -259,7 +279,6 @@ legend { margin-block-end: 7px; }
   .topbar { margin-block-start: 15px; min-height: 53px; }
   .invitation { grid-template-columns: 1fr; gap: 12px; padding: 27px 12px 21px; text-align: center; }
   .invitation h1 { font-size: clamp(2.16rem, 8.9vw, 3.6rem); }
-  .invitation p { margin-block-start: 6px; font-size: .9rem; }
   .sculpture-stage { justify-self: center; width: min(42%, 158px); }
   .booking-card, .host-grid { grid-template-columns: 1fr; }
   .time-panel { border-inline-start: 0; border-block-start: 1px solid var(--rule); }

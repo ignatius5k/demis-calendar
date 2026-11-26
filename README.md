@@ -11,7 +11,7 @@ A personal hangout calendar with a GitHub Pages booking screen and a Supabase ba
 3. Enter your Apple Account email and the generated password under **Connect Apple Calendar**. Choose where hangouts and time blocks should go, and which iCloud calendars should determine busy times.
 4. Set your **Weekly hours** under **Availability**, save them, and use **Copy booking link**.
 
-The guest page uses sample availability before you connect iCloud. Live bookings use Singapore time, open up to 45 days ahead, and require at least 15 minutes’ notice. Choose **Reconnect** to refresh the list of iCloud calendars or replace a revoked app-specific password. To remove access, revoke the app-specific password under Apple Account.
+The guest page uses sample availability before you connect iCloud. Guests can choose a hangout length from 15 minutes to 2 hours in 15-minute steps. The slider starts at the default hangout length in **Availability** and shows times that fit the chosen length. Live bookings use Singapore time, open up to 45 days ahead, and require at least 15 minutes’ notice. Choose **Reconnect** to refresh the list of iCloud calendars or replace a revoked app-specific password. To remove access, revoke the app-specific password under Apple Account.
 
 ## Notifications
 
