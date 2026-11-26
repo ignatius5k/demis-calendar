@@ -1,0 +1,5 @@
+project_id = "demis-calendar"
+
+[functions.demi-calendar]
+verify_jwt = false
+entrypoint = "./functions/demi-calendar/index.ts"

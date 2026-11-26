@@ -1,0 +1,8 @@
+{
+  "imports": {
+    "postgres": "npm:postgres@3.4.8",
+    "fast-xml-parser": "npm:fast-xml-parser@5.12.1",
+    "ical.js": "npm:ical.js@2.2.1",
+    "web-push": "npm:@block65/webcrypto-web-push@2.0.0"
+  }
+}
