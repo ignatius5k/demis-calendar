@@ -226,9 +226,6 @@ function renderGuest() {
 
   const status = $("page-status");
   status.replaceChildren();
-  if (state.mode === "preview") {
-    status.append(node("strong", "", "Preview mode."), document.createTextNode(" Times shown are examples."));
-  }
   if (state.mode === "error") {
     const retry = node("button", "button outline", "Retry");
     retry.addEventListener("click", () => { retry.disabled = true; refreshAvailability(); });

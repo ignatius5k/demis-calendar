@@ -190,7 +190,6 @@ p { overflow-wrap: anywhere; }
 .continue { margin-block-start: 22px; }
 .page-status { margin-block-start: 14px; color: var(--muted); font-size: .8rem; text-align: center; }
 .page-status:empty { display: none; }
-.page-status strong { color: var(--ink); }
 
 .host-view { padding-block: 49px 48px; }
 .host-heading {
