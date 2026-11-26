@@ -181,24 +181,20 @@ function renderGuest() {
 
   const focusedTime = document.activeElement?.dataset.start;
   const times = state.slotsByDay.get(state.selectedDate) || [];
-  $("chosen-date").textContent = state.selectedDate ? formatDate(dayEpoch(state.selectedDate)) : "Select a date to get started";
-  $("duration-label").textContent = state.mode === "loading" ? "" : state.duration + " min hangout";
+  $("chosen-date").textContent = state.selectedDate ? formatDate(dayEpoch(state.selectedDate)) : "Choose a time";
+  $("duration-label").textContent = state.selectedDate ? state.duration + " min hangout" : "";
   const timeButtons = times.map((start) => {
-    const button = node("button", "time-choice");
+    const button = node("button", "time-choice", formatTime(start));
     button.type = "button";
     button.dataset.start = start;
+    button.setAttribute("aria-label", timeRange(start, start + state.duration * MINUTE));
     button.setAttribute("aria-pressed", String(start === state.selectedStart));
-    const text = node("div");
-    text.append(node("b", "", formatTime(start)), node("span", "", " – " + formatTime(start + state.duration * MINUTE)));
-    const mark = node("i", "radio");
-    mark.setAttribute("aria-hidden", "true");
-    button.append(text, mark);
     return button;
   });
   const emptyMessage = {
     loading: "Checking the calendar…",
     error: "The calendar is temporarily unavailable.",
-  }[state.mode] || "There are no openings this month.";
+  }[state.mode] || "No openings this month.";
   $("times").replaceChildren(...(timeButtons.length ? timeButtons : [node("p", "slot-message", emptyMessage)]));
   if (focusedTime) timeButtons.find((button) => button.dataset.start === focusedTime)?.focus({ preventScroll: true });
   $("continue").disabled = state.selectedStart === null;
@@ -206,7 +202,7 @@ function renderGuest() {
   const status = $("page-status");
   status.replaceChildren();
   if (state.mode === "preview") {
-    status.append(icon("heart"), node("strong", "", "Preview mode."), document.createTextNode(" Live booking opens after Demi connects Apple Calendar and sets hours."));
+    status.append(node("strong", "", "Preview mode."), document.createTextNode(" Times shown are examples."));
   }
   if (state.mode === "error") {
     const retry = node("button", "button outline", "Retry");
@@ -612,7 +608,7 @@ function route() {
   $("host-view").hidden = !host;
   const link = $("nav-link");
   link.href = host ? "#" : "#host";
-  link.replaceChildren(icon(host ? "calendar" : "sliders"), node("span", "", host ? "Booking page" : "Host settings"));
+  link.textContent = host ? "Booking page" : "Host settings";
   if (host && state.hostKey && !state.host) {
     const key = state.hostKey;
     api("host", { key }).then((data) => {
@@ -634,3 +630,14 @@ window.addEventListener("hashchange", () => {
 });
 renderGuest();
 route();
+
+if ("IntersectionObserver" in window && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+  const observer = new IntersectionObserver((entries) => {
+    for (const entry of entries) {
+      if (!entry.isIntersecting) continue;
+      entry.target.classList.add("entered");
+      observer.unobserve(entry.target);
+    }
+  }, { threshold: 0.08 });
+  document.querySelectorAll("[data-reveal]").forEach((section) => observer.observe(section));
+}

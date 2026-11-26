@@ -3,95 +3,70 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#f3f1ef">
+  <meta name="theme-color" content="#f6f4f2">
   <meta name="description" content="Pick a day and time to hang out with Demi.">
   <title>Demi’s Calendar</title>
   <link rel="icon" href="./assets/mark.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="./assets/icon-192.png">
   <link rel="manifest" href="./manifest.webmanifest">
-  <link rel="preload" href="./assets/fonts/fraunces-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="./assets/fonts/nunito.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="./styles.css">
   <script type="module" src="./app.js"></script>
 </head>
 <body>
   <svg xmlns="http://www.w3.org/2000/svg" class="symbols" aria-hidden="true">
     <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M8 3v4m8-4v4M3 10h18"/><path d="M12 14v3m-1.5-1.5h3"/></symbol>
-    <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M5 4v7m0 4v5m7-16v2m0 4v10m7-16v10m0 4v2"/><circle cx="5" cy="13" r="2"/><circle cx="12" cy="8" r="2"/><circle cx="19" cy="16" r="2"/></symbol>
     <symbol id="i-left" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></symbol>
     <symbol id="i-right" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
     <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M4 12h15m-6-6 6 6-6 6"/></symbol>
-    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
-    <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><ellipse cx="12" cy="12" rx="4" ry="9"/></symbol>
-    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
     <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M6 18 18 6"/></symbol>
     <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 13a4 4 0 0 0 6 .5l4-4a4 4 0 0 0-5.7-5.7L12 6m2 5a4 4 0 0 0-6-.5l-4 4a4 4 0 0 0 5.7 5.7L12 18"/></symbol>
     <symbol id="i-bell" viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></symbol>
-    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 1 1 8 0v3m-4 4v3"/></symbol>
-    <symbol id="i-heart" viewBox="0 0 24 24"><path d="M20.6 5.7a4.7 4.7 0 0 0-6.6 0l-2 2-2-2a4.7 4.7 0 0 0-6.6 6.6l2 2L12 21l8.6-8.7a4.7 4.7 0 0 0 0-6.6Z"/></symbol>
-    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
   </svg>
 
-  <header class="topbar">
-    <div class="frame topbar-inner">
-      <a href="#" class="brand" aria-label="Demi’s Calendar booking page">
-        <img src="./assets/mark.svg" width="38" height="38" alt="">
-        <span>demi’s calendar</span>
-      </a>
-      <a href="#host" class="button outline nav-link" id="nav-link">
-        <svg class="icon" aria-hidden="true"><use href="#i-sliders"/></svg>
-        <span>Host settings</span>
-      </a>
-    </div>
+  <header class="frame topbar">
+    <a href="#" class="brand" aria-label="Demi’s Calendar booking page">
+      <img src="./assets/mark.svg" width="32" height="32" alt="">
+      <span>Demi’s Calendar</span>
+    </a>
+    <a href="#host" class="button plain nav-link" id="nav-link">Host settings</a>
   </header>
 
   <main class="frame guest-view" id="guest-view">
     <section class="invitation" aria-labelledby="invite-title">
       <div class="invitation-copy">
-        <h1 id="invite-title">Let’s make <em>some time.</em></h1>
-        <p>Pick a day and time to hang out with Demi.</p>
+        <h1 id="invite-title">Book a hangout.</h1>
+        <p>Singapore time (GMT+8)</p>
       </div>
-      <img class="sculpture" src="./assets/companions.webp" width="1000" height="663" alt="" fetchpriority="high">
+      <div class="sculpture-stage" data-reveal>
+        <img class="sculpture" src="./assets/companions.webp" width="1000" height="663" alt="" fetchpriority="high">
+      </div>
     </section>
 
-    <section class="booking-card" aria-label="Book a hangout">
-      <div class="date-panel">
-        <div class="section-title">
-          <span class="section-icon"><svg class="icon" aria-hidden="true"><use href="#i-calendar"/></svg></span>
-          <div>
-            <h2>Choose a date</h2>
-            <p class="muted">Dotted dates have openings.</p>
+    <section class="bezel" aria-label="Booking calendar" data-reveal>
+      <div class="booking-card">
+        <div class="date-panel">
+          <div class="month-bar">
+            <h2 id="month-label" aria-live="polite"></h2>
+            <div class="month-buttons">
+              <button class="icon-button" id="month-prev" type="button" aria-label="Previous month"><svg class="icon" aria-hidden="true"><use href="#i-left"/></svg></button>
+              <button class="icon-button" id="month-next" type="button" aria-label="Next month"><svg class="icon" aria-hidden="true"><use href="#i-right"/></svg></button>
+            </div>
           </div>
-        </div>
-        <div class="month-bar">
-          <h3 id="month-label" aria-live="polite"></h3>
-          <div class="month-buttons">
-            <button class="icon-button" id="month-prev" type="button" aria-label="Previous month"><svg class="icon" aria-hidden="true"><use href="#i-left"/></svg></button>
-            <button class="icon-button" id="month-next" type="button" aria-label="Next month"><svg class="icon" aria-hidden="true"><use href="#i-right"/></svg></button>
+          <div class="weekdays" aria-hidden="true">
+            <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
           </div>
+          <div class="days" id="days" role="group" aria-label="Choose a date"></div>
+          <span class="legend" aria-hidden="true">Available dates</span>
         </div>
-        <div class="weekdays" aria-hidden="true">
-          <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+        <div class="time-panel">
+          <h2 id="chosen-date" aria-live="polite">Choose a time</h2>
+          <p class="time-meta" id="duration-label"></p>
+          <div class="times" id="times" role="group" aria-label="Choose a time"></div>
+          <button class="button primary continue" id="continue" disabled type="button">
+            Continue <span class="button-arrow"><svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></span>
+          </button>
         </div>
-        <div class="days" id="days" role="group" aria-label="Bookable dates"></div>
-        <div class="legend" aria-hidden="true">
-          <span><i></i> Open</span>
-          <span><i></i> Unavailable</span>
-        </div>
-      </div>
-      <div class="time-panel">
-        <div class="section-title">
-          <span class="section-icon time-icon"><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg></span>
-          <div>
-            <h2>Choose a time</h2>
-            <p class="muted" id="chosen-date" aria-live="polite">Select a date to get started</p>
-          </div>
-        </div>
-        <div class="time-meta">
-          <span><svg class="icon" aria-hidden="true"><use href="#i-globe"/></svg> Singapore time <small>GMT+8</small></span>
-          <span id="duration-label"></span>
-        </div>
-        <div class="times" id="times" role="group" aria-label="Available times"></div>
-        <button class="button primary continue" id="continue" disabled type="button">Continue <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></button>
       </div>
     </section>
     <p class="page-status" id="page-status" role="status"></p>
@@ -99,110 +74,115 @@
 
   <main class="frame host-view" id="host-view" hidden>
     <header class="host-heading">
-      <div>
-        <h1>Host settings</h1>
-        <p class="muted">Set your hours, see who’s coming, and make room for real life.</p>
-      </div>
+      <h1>Host settings</h1>
       <div class="actions" id="host-actions" hidden>
         <button type="button" class="button outline" id="copy-link"><svg class="icon" aria-hidden="true"><use href="#i-link"/></svg> Copy booking link</button>
         <button type="button" class="button plain" id="lock-host">Lock</button>
       </div>
     </header>
 
-    <section class="panel unlock" id="host-unlock" aria-labelledby="unlock-title">
-      <span class="section-icon"><svg class="icon" aria-hidden="true"><use href="#i-lock"/></svg></span>
-      <h2 id="unlock-title">Open your host space</h2>
-      <p class="muted">Enter your private host key to manage Demi’s Calendar.</p>
-      <form id="unlock-form">
-        <label>Host key <input id="host-key" name="key" type="password" required maxlength="128" autocomplete="current-password" spellcheck="false"></label>
-        <p class="form-message" role="status"></p>
-        <button class="button primary" type="submit">Unlock <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></button>
-      </form>
+    <section class="bezel unlock" id="host-unlock" aria-labelledby="unlock-title">
+      <div class="panel">
+        <h2 id="unlock-title">Open your host space</h2>
+        <form class="form-stack" id="unlock-form">
+          <label>Host key <input id="host-key" name="key" type="password" required maxlength="128" autocomplete="current-password" spellcheck="false"></label>
+          <p class="form-message" role="status"></p>
+          <button class="button primary" type="submit">Unlock</button>
+        </form>
+      </div>
     </section>
 
     <div id="host-content" hidden>
       <nav class="host-tabs" aria-label="Host settings sections">
-        <button class="tab" type="button" data-tab="calendar" aria-pressed="true">Apple Calendar</button>
+        <button class="tab" type="button" data-tab="calendar" aria-pressed="true">Calendar</button>
         <button class="tab" type="button" data-tab="availability" aria-pressed="false">Availability</button>
         <button class="tab" type="button" data-tab="bookings" aria-pressed="false">Bookings</button>
         <button class="tab" type="button" data-tab="notifications" aria-pressed="false">Notifications</button>
       </nav>
 
-      <section class="panel host-pane" data-pane="calendar" aria-labelledby="connection-title">
-        <div id="connect-panel">
-          <h2 id="connection-title">Connect Apple Calendar</h2>
-          <p class="muted">Choose which iCloud calendars can block times and where to save your hangouts.</p>
-          <form id="connect-form" class="form-stack">
-            <label>Apple Account email <input type="email" name="email" autocomplete="username" maxlength="254" required></label>
-            <label>App-specific password <input type="password" name="password" autocomplete="off" spellcheck="false" maxlength="64" placeholder="xxxx-xxxx-xxxx-xxxx" required></label>
-            <p class="field-note">Generate a password for Demi’s Calendar under <a href="https://account.apple.com/" target="_blank" rel="noopener noreferrer">Apple Account</a> → Sign-In and Security → App-Specific Passwords.</p>
-            <p class="form-message" role="status"></p>
-            <button class="button primary" type="submit">Connect iCloud</button>
-          </form>
-        </div>
-        <div id="connected-panel" hidden>
-          <div class="panel-heading">
-            <div><h2>Apple Calendar</h2><p class="muted" id="connection-status"></p></div>
-            <button class="button outline" id="reconnect" type="button">Reconnect</button>
+      <section class="bezel host-pane" data-pane="calendar" aria-label="Apple Calendar">
+        <div class="panel">
+          <div id="connect-panel">
+            <h2>Connect Apple Calendar</h2>
+            <form id="connect-form" class="form-stack">
+              <label>Apple Account email <input type="email" name="email" autocomplete="username" maxlength="254" required></label>
+              <label>App-specific password <input type="password" name="password" autocomplete="off" spellcheck="false" maxlength="64" placeholder="xxxx-xxxx-xxxx-xxxx" required></label>
+              <p class="field-note">Generate a password for Demi’s Calendar under <a href="https://account.apple.com/" target="_blank" rel="noopener noreferrer">Apple Account</a> → Sign-In and Security → App-Specific Passwords.</p>
+              <p class="form-message" role="status"></p>
+              <button class="button primary" type="submit">Connect iCloud</button>
+            </form>
           </div>
-          <form id="calendar-form" class="form-stack">
-            <label>Save hangouts and blocks to <select id="write-calendar" name="writeCalendar"></select></label>
-            <fieldset>
-              <legend>Check these calendars for busy times</legend>
-              <div class="calendar-options" id="busy-calendars"></div>
-              <p class="field-note">The calendar you save hangouts to is always checked.</p>
-            </fieldset>
-            <p class="form-message" role="status"></p>
-            <button class="button primary" type="submit">Save calendars</button>
-          </form>
+          <div id="connected-panel" hidden>
+            <div class="panel-heading">
+              <div><h2>Apple Calendar</h2><p class="muted" id="connection-status"></p></div>
+              <button class="button outline" id="reconnect" type="button">Reconnect</button>
+            </div>
+            <form id="calendar-form" class="form-stack">
+              <label>Save hangouts and blocks to <select id="write-calendar" name="writeCalendar"></select></label>
+              <fieldset>
+                <legend>Check these calendars for busy times</legend>
+                <div class="calendar-options" id="busy-calendars"></div>
+                <p class="field-note">The calendar you save hangouts to is always checked.</p>
+              </fieldset>
+              <p class="form-message" role="status"></p>
+              <button class="button primary" type="submit">Save calendars</button>
+            </form>
+          </div>
         </div>
       </section>
 
       <div class="host-pane host-grid" data-pane="availability" hidden>
-        <section class="panel" aria-labelledby="hours-title">
-          <h2 id="hours-title">Weekly hours</h2>
-          <p class="muted">Let guests book up to 45 days ahead. Times are in Singapore time.</p>
-          <form class="form-stack" id="hours-form">
-            <label class="duration-field">Hangout length <select id="duration" name="duration"><option value="30">30 minutes</option><option value="45">45 minutes</option><option value="60">60 minutes</option><option value="90">90 minutes</option></select></label>
-            <div id="weekly-hours" class="weekly-hours"></div>
-            <p class="form-message" role="status"></p>
-            <button class="button primary" type="submit">Save hours</button>
-          </form>
+        <section class="bezel" aria-labelledby="hours-title">
+          <div class="panel">
+            <h2 id="hours-title">Weekly hours</h2>
+            <p class="muted">Singapore time · Guests can book 45 days ahead.</p>
+            <form class="form-stack" id="hours-form">
+              <label class="duration-field">Hangout length <select id="duration" name="duration"><option value="30">30 minutes</option><option value="45">45 minutes</option><option value="60">60 minutes</option><option value="90">90 minutes</option></select></label>
+              <div id="weekly-hours" class="weekly-hours"></div>
+              <p class="form-message" role="status"></p>
+              <button class="button primary" type="submit">Save hours</button>
+            </form>
+          </div>
         </section>
-        <section class="panel" aria-labelledby="block-title">
-          <h2 id="block-title">Block time</h2>
-          <p class="muted">An iCloud event marked busy already holds that time. Add a block here for anything else.</p>
-          <form class="form-stack" id="block-form">
-            <label>Date <input id="block-day" type="date" name="date" required></label>
-            <div class="field-pair">
-              <label>From <input type="time" name="start" value="12:00" required></label>
-              <label>Until <input type="time" name="end" value="13:00" required></label>
-            </div>
-            <p class="form-message" role="status"></p>
-            <button class="button outline" type="submit"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg> Add block</button>
-          </form>
-          <div class="item-list block-list" id="blocks"></div>
+        <section class="bezel" aria-labelledby="block-title">
+          <div class="panel">
+            <h2 id="block-title">Block time</h2>
+            <p class="muted">Busy iCloud events already block time.</p>
+            <form class="form-stack" id="block-form">
+              <label>Date <input id="block-day" type="date" name="date" required></label>
+              <div class="field-pair">
+                <label>From <input type="time" name="start" value="12:00" required></label>
+                <label>Until <input type="time" name="end" value="13:00" required></label>
+              </div>
+              <p class="form-message" role="status"></p>
+              <button class="button outline" type="submit">Add block</button>
+            </form>
+            <div class="item-list block-list" id="blocks"></div>
+          </div>
         </section>
       </div>
 
-      <section class="panel host-pane" data-pane="bookings" aria-labelledby="bookings-title" hidden>
-        <h2 id="bookings-title">Upcoming hangouts</h2>
-        <p class="muted">Confirmed hangouts also appear in Apple Calendar.</p>
-        <div class="item-list" id="bookings"></div>
+      <section class="bezel host-pane" data-pane="bookings" aria-labelledby="bookings-title" hidden>
+        <div class="panel">
+          <h2 id="bookings-title">Upcoming hangouts</h2>
+          <div class="item-list" id="bookings"></div>
+        </div>
       </section>
 
-      <section class="panel host-pane" data-pane="notifications" aria-labelledby="notifications-title" hidden>
-        <div class="panel-heading">
-          <div>
-            <h2 id="notifications-title">Notifications</h2>
-            <p class="muted">Get a heads-up on this device when someone books or a busy slot opens in the next 7 days.</p>
+      <section class="bezel host-pane" data-pane="notifications" aria-labelledby="notifications-title" hidden>
+        <div class="panel">
+          <div class="panel-heading">
+            <div>
+              <h2 id="notifications-title">Notifications</h2>
+              <p class="muted">Alerts for new bookings and openings in the next 7 days.</p>
+            </div>
+            <button class="button outline" id="push-toggle" type="button"><svg class="icon" aria-hidden="true"><use href="#i-bell"/></svg> <span>Enable alerts</span></button>
           </div>
-          <button class="button outline" id="push-toggle" type="button"><svg class="icon" aria-hidden="true"><use href="#i-bell"/></svg> <span>Enable alerts</span></button>
+          <p class="field-note">On iPhone or iPad, add Demi’s Calendar to your Home Screen, then enable alerts in the installed app.</p>
+          <p class="form-message" id="push-message" role="status"></p>
+          <h3 class="list-title">Recent activity</h3>
+          <div class="item-list" id="activity"></div>
         </div>
-        <p class="field-note">On iPhone or iPad, add Demi’s Calendar to your Home Screen, then enable alerts in the installed app.</p>
-        <p class="form-message" id="push-message" role="status"></p>
-        <h3 class="list-title">Recent activity</h3>
-        <div class="item-list" id="activity"></div>
       </section>
     </div>
   </main>
@@ -210,7 +190,6 @@
   <dialog class="modal" id="book-dialog" aria-labelledby="book-title">
     <button type="button" class="icon-button close-dialog" aria-label="Close booking"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button>
     <div id="book-step">
-      <span class="section-icon"><svg class="icon" aria-hidden="true"><use href="#i-heart"/></svg></span>
       <h2 id="book-title">Make it a date</h2>
       <p class="slot-summary" id="book-summary"></p>
       <form class="form-stack" id="book-form">
@@ -219,11 +198,10 @@
         <label>A little note <span class="optional">optional</span><textarea name="note" rows="2" maxlength="280" placeholder="Coffee, a walk, or anything in mind?"></textarea></label>
         <p class="field-note" id="booking-note">Your email is shared with Demi so you can make plans.</p>
         <p class="form-message" role="status"></p>
-        <button class="button primary full" type="submit">Book hangout <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></button>
+        <button class="button primary full" type="submit">Book hangout <span class="button-arrow"><svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></span></button>
       </form>
     </div>
     <div class="confirmed" id="confirmed-step" hidden>
-      <span class="section-icon"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span>
       <h2 id="confirmed-title">It’s a date!</h2>
       <p class="slot-summary" id="confirmed-summary"></p>
       <p class="muted" id="confirmed-note"></p>

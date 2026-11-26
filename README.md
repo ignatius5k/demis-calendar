@@ -29,7 +29,7 @@ Run the calendar tests with:
 
     deno test --config supabase/functions/demi-calendar/deno.json supabase/functions/demi-calendar/calendar_test.ts
 
-The artwork was created with ImageGen. Fraunces, Fredoka, and Nunito are distributed under their bundled SIL Open Font Licenses.
+The artwork was created with ImageGen. Nunito is distributed under its bundled SIL Open Font License.
 
 ## Artwork
 
