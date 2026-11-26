@@ -350,7 +350,20 @@ function showTab(name) {
 }
 
 for (const button of document.querySelectorAll("[data-tab]")) {
-  button.addEventListener("click", () => showTab(button.dataset.tab));
+  button.addEventListener("click", async () => {
+    const tab = button.dataset.tab;
+    showTab(tab);
+    if (!state.hostKey || !["bookings", "notifications"].includes(tab)) return;
+    const key = state.hostKey;
+    try {
+      const data = await api("host", { key });
+      if (state.hostKey !== key) return;
+      renderItems($("bookings"), data.bookings, "booking");
+      renderItems($("activity"), data.activity, "activity");
+    } catch (error) {
+      if (error.status === 401) lockHost();
+    }
+  });
 }
 
 function renderWeekly(weekly, duration) {
@@ -600,7 +613,7 @@ function route() {
   const link = $("nav-link");
   link.href = host ? "#" : "#host";
   link.replaceChildren(icon(host ? "calendar" : "sliders"), node("span", "", host ? "Booking page" : "Host settings"));
-  if (host && state.hostKey) {
+  if (host && state.hostKey && !state.host) {
     const key = state.hostKey;
     api("host", { key }).then((data) => {
       if (state.hostKey === key) renderHost(data);
